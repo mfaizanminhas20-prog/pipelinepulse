@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>PipelinePulse</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+    header{width:100%;padding:20px 40px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center}
+    .logo{font-size:1.6rem;font-weight:700;background:linear-gradient(90deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .tag{margin-left:auto;color:#94a3b8;font-size:.85rem}
+    main{max-width:900px;width:100%;padding:50px 20px;display:flex;flex-direction:column;align-items:center;gap:28px}
+    h1{font-size:2.8rem;font-weight:800;text-align:center;background:linear-gradient(90deg,#f1f5f9,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    p.sub{color:#94a3b8;text-align:center;font-size:1.1rem;line-height:1.7;max-width:540px}
+    .btn{background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;border:none;padding:16px 40px;font-size:1.05rem;font-weight:700;border-radius:12px;cursor:pointer;transition:transform .15s}
+    .btn:hover{transform:translateY(-2px)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    #status{font-size:.9rem;color:#94a3b8;min-height:20px}
+    #status.error{color:#f87171}
+    #status.success{color:#4ade80}
+    #widget-container{width:100%;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);display:none}
+    #fastn-widget{width:100%;height:600px;border:none}
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;text-align:center}
+    .card .icon{font-size:2rem;margin-bottom:10px}
+    .card h3{font-size:1rem;font-weight:600;margin-bottom:6px}
+    .card p{font-size:.85rem;color:#94a3b8}
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">⚡ PipelinePulse</div>
+  <div class="tag">B2B Sales Pipeline Intelligence</div>
+</header>
+<main>
+  <h1>Know Your Pipeline.<br/>Close More Deals.</h1>
+  <p class="sub">Connect HubSpot and Slack to get automated daily deal summaries delivered straight to your team — powered by Fastn.</p>
+  <button class="btn" id="connectBtn" onclick="loadWidget()">🔗 Connect Sales Stack</button>
+  <div id="status"></div>
+  <div id="widget-container">
+    <iframe id="fastn-widget" title="PipelinePulse" allow="clipboard-write" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+  <div class="features">
+    <div class="card"><div class="icon">📊</div><h3>Live Deal Tracking</h3><p>Pull open deals from HubSpot automatically.</p></div>
+    <div class="card"><div class="icon">💬</div><h3>Slack Alerts</h3><p>Formatted summaries in your Slack channel.</p></div>
+    <div class="card"><div class="icon">⚙️</div><h3>Zero Setup</h3><p>One-click integration for your sales team.</p></div>
+  </div>
+</main>
+<script>
+async function loadWidget(){
+  const btn=document.getElementById('connectBtn');
+  const status=document.getElementById('status');
+  const container=document.getElementById('widget-container');
+  const iframe=document.getElementById('fastn-widget');
+  btn.disabled=true;
+  btn.textContent='⏳ Connecting...';
+  status.className='';
+  status.textContent='Fetching token...';
+  try{
+    const res=await fetch('/api/fastn-token');
+    const data=await res.json();
+    if(!data.token) throw new Error('No token received');
+    status.className='success';
+    status.textContent='✅ Connected! Loading integrations...';
+    iframe.src=`https://api.fastn.dev/v1/embed/iframe?token=${data.token}`;
+    container.style.display='block';
+    btn.textContent='✅ Connected';
+  }catch(err){
+    status.className='error';
+    status.textContent='❌ Error: '+err.message;
+    btn.disabled=false;
+    btn.textContent='🔗 Connect Sales Stack';
+  }
+}
+</script>
+</body>
+</html>
